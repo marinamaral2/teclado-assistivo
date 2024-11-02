@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teclado Assistivo</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon-192.png">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        #texto {
+            width: 90%;
+            height: 150px;
+            margin-bottom: 20px;
+            padding: 10px;
+            font-size: 18px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+        }
+
+        #teclado {
+            width: 95%;
+            max-width: 800px;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px;
+            background-color: #e0e0e0;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .tecla {
+            aspect-ratio: 1;
+            font-size: 24px;
+            border: none;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .tecla:active {
+            transform: scale(0.95);
+            background-color: #e0e0e0;
+        }
+
+        .tecla-especial {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 600px) {
+            #teclado {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <textarea id="texto" placeholder="Digite seu texto aqui..."></textarea>
+    <div id="teclado"></div>
+
+    <script>
+        const letras = [
+            'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
+            'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ç',
+            'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '?'
+        ];
+
+        const teclado = document.getElementById('teclado');
+        const texto = document.getElementById('texto');
+
+        // Adiciona as letras
+        letras.forEach(letra => {
+            const tecla = document.createElement('button');
+            tecla.textContent = letra;
+            tecla.className = 'tecla';
+            tecla.addEventListener('click', () => inserirTexto(letra));
+            teclado.appendChild(tecla);
+        });
+
+        // Adiciona a barra de espaço
+        const espaco = document.createElement('button');
+        espaco.textContent = 'Espaço';
+        espaco.className = 'tecla tecla-especial';
+        espaco.addEventListener('click', () => inserirTexto(' '));
+        teclado.appendChild(espaco);
+
+        function inserirTexto(caractere) {
+            const posicaoInicial = texto.selectionStart;
+            const posicaoFinal = texto.selectionEnd;
+            const textoAtual = texto.value;
+            
+            texto.value = textoAtual.substring(0, posicaoInicial) + 
+                         caractere + 
+                         textoAtual.substring(posicaoFinal);
+            
+            texto.focus();
+            texto.selectionStart = texto.selectionEnd = posicaoInicial + caractere.length;
+        }
+
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registrado com sucesso:', registration);
+                })
+                .catch(error => {
+                    console.log('Falha ao registrar o Service Worker:', error);
+                });
+        }
+    </script>
+</body>
+</html>
