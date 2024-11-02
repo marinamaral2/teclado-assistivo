@@ -18,6 +18,27 @@
             background-color: #f0f0f0;
         }
 
+        #controles {
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .botao-controle {
+            padding: 10px 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .botao-controle:active {
+            transform: scale(0.95);
+        }
+
         #texto {
             width: 90%;
             height: 150px;
@@ -68,6 +89,10 @@
     </style>
 </head>
 <body>
+    <div id="controles">
+        <button class="botao-controle" onclick="ajustarFonte(2)">A+</button>
+        <button class="botao-controle" onclick="ajustarFonte(-2)">A-</button>
+    </div>
     <textarea id="texto" placeholder="Digite seu texto aqui..."></textarea>
     <div id="teclado"></div>
 
@@ -80,6 +105,22 @@
 
         const teclado = document.getElementById('teclado');
         const texto = document.getElementById('texto');
+        
+        // Tamanhos iniciais das fontes
+        let tamanhoFonteTeclado = 24;
+        let tamanhoFonteTexto = 18;
+
+        function ajustarFonte(alteracao) {
+            // Ajusta o tamanho da fonte do teclado
+            tamanhoFonteTeclado = Math.min(Math.max(tamanhoFonteTeclado + alteracao, 16), 48);
+            document.querySelectorAll('.tecla').forEach(tecla => {
+                tecla.style.fontSize = tamanhoFonteTeclado + 'px';
+            });
+
+            // Ajusta o tamanho da fonte do texto
+            tamanhoFonteTexto = Math.min(Math.max(tamanhoFonteTexto + alteracao, 14), 40);
+            texto.style.fontSize = tamanhoFonteTexto + 'px';
+        }
 
         // Adiciona as letras
         letras.forEach(letra => {
@@ -97,6 +138,13 @@
         espaco.addEventListener('click', () => inserirTexto(' '));
         teclado.appendChild(espaco);
 
+        // Adiciona o botão de apagar
+        const apagar = document.createElement('button');
+        apagar.textContent = '⌫';
+        apagar.className = 'tecla tecla-especial';
+        apagar.addEventListener('click', () => apagarCaractere());
+        teclado.appendChild(apagar);
+
         function inserirTexto(caractere) {
             const posicaoInicial = texto.selectionStart;
             const posicaoFinal = texto.selectionEnd;
@@ -108,6 +156,26 @@
             
             texto.focus();
             texto.selectionStart = texto.selectionEnd = posicaoInicial + caractere.length;
+        }
+
+        function apagarCaractere() {
+            const posicaoInicial = texto.selectionStart;
+            const posicaoFinal = texto.selectionEnd;
+            const textoAtual = texto.value;
+            
+            if (posicaoInicial === posicaoFinal) {
+                if (posicaoInicial > 0) {
+                    texto.value = textoAtual.substring(0, posicaoInicial - 1) + 
+                                textoAtual.substring(posicaoFinal);
+                    texto.selectionStart = texto.selectionEnd = posicaoInicial - 1;
+                }
+            } else {
+                texto.value = textoAtual.substring(0, posicaoInicial) + 
+                            textoAtual.substring(posicaoFinal);
+                texto.selectionStart = texto.selectionEnd = posicaoInicial;
+            }
+            
+            texto.focus();
         }
 
         // Registra o Service Worker
